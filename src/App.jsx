@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 
 const NAV_LINKS = [
-  { id: 'about', label: 'about' },
-  { id: 'experience', label: 'experience' },
-  { id: 'projects', label: 'projects' },
-  { id: 'skills', label: 'skills' },
-  { id: 'contact', label: 'contact' },
+  { id: 'about', label: 'About' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'contact', label: 'Contact' },
 ]
 
 const EXPERIENCE = [
@@ -45,6 +45,34 @@ const EXPERIENCE = [
 ]
 
 const PROJECTS = [
+  {
+    name: 'JOB NEXA',
+    file: 'Job-Nexa/',
+    description:
+      'Full Stack Job Portal & Recruitment Management System',
+    points: [
+      ' Developed a full-stack job portal application similar to Naukri, designed for freshers and experienced professionals, enabling candidates to search and apply for jobs while recruiters manage job postings and recruitment activities.',
+      'Built responsive frontend interfaces using React.js, Vite, React Router DOM, Axios, and CSS, implementing role-based dashboards for Candidates, Recruiters, and Admins, along with job search, filtering, profile management, and application tracking',
+      ' Developed RESTful APIs using Node.js and Express.js, integrated Microsoft SQL Server for database management, and implemented secure authentication and authorization using JWT and bcrypt, including resume uploads, applicant management,and job application workflows',
+    ],
+    stack: ['React.js', 'Vite, JavaScript (ES6+)', 'React Router DOM, Axios', 'HTML5', 'CSS3', 'Node.js', 'Express.js', 'RESTful APIs',
+      'Microsoft SQL Server', 'JWT', 'bcrypt', 'Multer, Recharts', ' Git', ' GitHub'],
+    link: 'https://github.com/Natanasundaram/JOB-NEXA',
+  },
+  {
+    name: 'Task Manager',
+    file: 'task-manager/',
+    description:
+      'Developed a full-stack Task Manager application with secure user authentication and task CRUD operations. Built REST APIs using Node.js and Express.js, integrated SQL Server for data management, and implemented JWT authentication, bcrypt password hashing, and protected React routes.',
+    points: [
+      ' Built a full-stack task manager with 8 REST API endpoints covering task CRUD, registration, login, and a database health check.',
+      'Secured the API with JWT authentication, bcrypt password hashing, and parameterized T-SQL queries; scoped every query by user ID so each user can only read and change their own tasks..',
+      'Designed the relational SQL Server schema with a foreign key (cascade delete), CHECK constraints, and a composite index.',
+      ' Built the UI with React Router protected routes, Axios interceptors, and React Hooks (useState, useEffect, useMemo).'
+    ],
+    stack: ['React 18', 'Vite', 'Node.js', 'Express 5', 'Microsoft SQL Server', 'RESTful APIs', 'bcrypt', 'JWT'],
+    link: 'https://github.com/Natanasundaram/Task-Manager',
+  },
   {
     name: 'To-Do List Web Application',
     file: 'todo-app/',
@@ -90,6 +118,43 @@ const SKILLS = [
   { group: 'Tools', items: ['Git', 'GitHub', 'VS Code'] },
 ]
 
+/* ---------- Email ---------- */
+const EMAIL = 'nadanasundaram79@gmail.com'
+const MAIL_SUBJECT = 'Hello Natana' // edit this to change the pre-filled subject line
+
+const MAILTO_URL = `mailto:${EMAIL}?subject=${encodeURIComponent(MAIL_SUBJECT)}`
+const GMAIL_COMPOSE_URL = `https://mail.google.com/mail/?view=cm&fs=1&to=${EMAIL}&su=${encodeURIComponent(MAIL_SUBJECT)}`
+
+const IS_MOBILE =
+  typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+
+const MAIL_LINK_PROPS = IS_MOBILE
+  ? { href: MAILTO_URL }
+  : { href: GMAIL_COMPOSE_URL, target: '_blank', rel: 'noreferrer' }
+
+/* ---------- Profile photo ---------- */
+// Put your photo in the project's `public` folder (next to index.html) and name it photo.jpg.
+// Using a different name or format (e.g. me.png)? Just change PHOTO_FILE below.
+const PHOTO_FILE = 'photo.png'
+const PHOTO_SRC = `${import.meta.env.BASE_URL}${PHOTO_FILE}`
+
+// Inline styles so the photo looks right without touching your CSS file.
+// Change `width` / `height` here to make the photo bigger or smaller.
+const PHOTO_STYLE = {
+  position: 'relative',
+  zIndex: 1,
+  display: 'block',
+  width: 140,
+  height: 140,
+  maxWidth: '100%',
+  borderRadius: '50%',
+  objectFit: 'cover',
+  objectPosition: 'center top', // keeps faces in frame for portrait photos
+  border: '2px solid rgba(128, 128, 128, 0.4)',
+  boxShadow: '0 8px 28px rgba(0, 0, 0, 0.25)',
+  marginBottom: 24,
+}
+
 function useActiveSection(ids) {
   const [active, setActive] = useState(ids[0])
 
@@ -119,6 +184,7 @@ function useActiveSection(ids) {
 export default function App() {
   const active = useActiveSection(NAV_LINKS.map((link) => link.id))
   const [menuOpen, setMenuOpen] = useState(false)
+  const [photoFailed, setPhotoFailed] = useState(false) // true if the image file is missing
 
   return (
     <>
@@ -151,7 +217,7 @@ export default function App() {
 
           <a
             className="nav-resume"
-            href="mailto:nadanasundaram79@gmail.com"
+            {...MAIL_LINK_PROPS}
             onClick={() => setMenuOpen(false)}
           >
             say hello
@@ -163,11 +229,22 @@ export default function App() {
         <section className="hero">
           <div className="hero-grid" aria-hidden="true" />
 
+          {!photoFailed && (
+            <img
+              src={PHOTO_SRC}
+              alt="Portrait of Natana Sundaram"
+              width="140"
+              height="140"
+              style={PHOTO_STYLE}
+              onError={() => setPhotoFailed(true)}
+            />
+          )}
+
           <p className="hero-eyebrow">
-            full-stack developer, based in Trichy, India
+            full-stack developer, based in Chennai, India
           </p>
 
-         <h2>Natana sundaram</h2>
+          <h2>Natana sundaram</h2>
 
           <p className="hero-line">
             I build interfaces in React and the APIs behind them in Node and Express
@@ -187,7 +264,7 @@ export default function App() {
         </section>
 
         <section id="about" className="section">
-          <p className="section-tag">// about</p>
+          <p className="section-tag">About</p>
           <div className="section-body">
             <p>
               I got into web development the way most people in this field do now: through
@@ -207,7 +284,7 @@ export default function App() {
         </section>
 
         <section id="experience" className="section">
-          <p className="section-tag">// Experience</p>
+          <p className="section-tag">Experience</p>
           <ol className="timeline">
             {EXPERIENCE.map((job) => (
               <li key={job.org} className="timeline-item">
@@ -237,7 +314,7 @@ export default function App() {
         </section>
 
         <section id="projects" className="section">
-          <p className="section-tag">// projects</p>
+          <p className="section-tag">Projects</p>
           <div className="project-list">
             {PROJECTS.map((project) => (
               <a
@@ -270,7 +347,7 @@ export default function App() {
         </section>
 
         <section id="skills" className="section">
-          <p className="section-tag">// skills</p>
+          <p className="section-tag">Skills</p>
           <div className="skills-grid">
             {SKILLS.map((group) => (
               <div className="skills-group" key={group.group}>
@@ -286,29 +363,26 @@ export default function App() {
         </section>
 
         <section id="contact" className="section section-contact">
-          <p className="section-tag">// contact</p>
+          <p className="section-tag">Contact</p>
           <h2>Working on something and need another pair of hands?</h2>
           <p className="contact-sub">
             I'm open to entry-level full-stack roles and internships — email is the fastest way
             to reach me.
           </p>
 
-          <a
-            className="btn-primary btn-large"
-            href="mailto:nadanasundaram79@gmail.com"
-          >
-            nadanasundaram79@gmail.com
+          <a className="btn-primary btn-large" {...MAIL_LINK_PROPS}>
+            {EMAIL}
           </a>
 
           <div className="contact-links">
             <a href="tel:+919384375263">+91 93843 75263</a>
-            <a href="https://github.com/dashboard" target="_blank" rel="noreferrer">
+            <a href="https://github.com/Natanasundaram" target="_blank" rel="noreferrer">
               GitHub
             </a>
             <a href="https://www.linkedin.com/in/natanasundaram08/" target="_blank" rel="noreferrer">
               LinkedIn
             </a>
-            <span>Trichy, India</span>
+            <span>Chennai, India</span>
           </div>
         </section>
       </main>
