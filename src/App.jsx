@@ -1,11 +1,37 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+/* ---------- Links ---------- */
+const GITHUB_PROFILE = 'https://github.com/Natanasundaram'
+const LINKEDIN_URL = 'https://www.linkedin.com/in/natanasundaram08/'
+const PHONE_DISPLAY = '+91 93843 75263'
+const PHONE_TEL = 'tel:+919384375263'
+const LOCATION = 'Chennai, India'
 
 const NAV_LINKS = [
   { id: 'about', label: 'About' },
   { id: 'experience', label: 'Experience' },
   { id: 'projects', label: 'Projects' },
   { id: 'skills', label: 'Skills' },
+  { id: 'education', label: 'Education' },
   { id: 'contact', label: 'Contact' },
+]
+
+/* Numbers shown in the strip under the hero. */
+const STATS = [
+  { value: '3', label: 'Internships' },
+  { value: '5', label: 'Projects built' },
+  { value: '8.03', label: 'CGPA, B.E. CSE' },
+  { value: '2026', label: 'B.E. graduate' },
+]
+
+/* The "quick facts" panel in the About section. */
+const FACTS = [
+  ['location', LOCATION],
+  ['degree', 'B.E. Computer Science and Engineering'],
+  ['graduated', 'May 2026 · CGPA 8.03'],
+  ['focus', 'Full-stack web development'],
+  ['stack', 'React.js, Node.js, Express.js, SQL Server'],
+  ['targeting', 'Full Stack Developer / Software Engineer (entry-level)'],
 ]
 
 const EXPERIENCE = [
@@ -15,8 +41,8 @@ const EXPERIENCE = [
     dates: 'Oct 2024 – Nov 2024',
     location: 'Remote',
     points: [
-      'Went through a full-stack training program covering React component structure and state management, HTML5, CSS3, and JavaScript — applied it afterward in the To-Do and Social Media projects.',
-      'Traced how a UI layer talks to Node.js/Express logic end to end, which became the mental model for every project since.',
+      'Completed a full-stack training program in React.js, HTML5, CSS3 and JavaScript, covering component structure and state management, and applied both in independent Create, Read, Update, Delete (CRUD) projects.',
+      'Traced the front-end-to-back-end flow of a web application, including how UI components connect to Node.js and Express.js logic.',
     ],
     stack: ['React.js', 'Node.js', 'Express'],
   },
@@ -26,8 +52,8 @@ const EXPERIENCE = [
     dates: 'Aug 2024 – Sep 2024',
     location: 'Remote',
     points: [
-      'Worked through a structured HTML5/CSS3/JavaScript curriculum, then used it to build responsive page layouts on my own.',
-      'Practiced cross-browser layout fixes and basic UI/UX principles across a set of exercises.',
+      'Worked through a structured web development curriculum in HTML5, CSS3 and JavaScript and built responsive page layouts in independent projects.',
+      'Practiced cross-browser compatibility and core user interface and user experience (UI/UX) principles.',
     ],
     stack: ['HTML5', 'CSS3', 'JavaScript'],
   },
@@ -37,41 +63,64 @@ const EXPERIENCE = [
     dates: 'Feb 2024 – Mar 2024',
     location: 'Remote',
     points: [
-      'Completed front-end training modules covering React, Express, and Node.js fundamentals.',
-      'Applied responsive design and page-structure basics to build layouts outside the coursework.',
+      'Completed front-end training in HTML5, CSS3 and JavaScript and applied it to responsive layouts in independent projects.',
+      'Practiced responsive design and site-structure fundamentals in coding modules covering React, Express.js and Node.js.',
     ],
     stack: ['React', 'Express', 'Node.js'],
   },
 ]
 
+/*
+  Every project has a GitHub link. Projects marked `featured` are shown as wide cards;
+  the rest sit in a row of compact cards below them.
+  Air Quality: swap `link` for the exact repository URL when you have it
+  (right now it points to your GitHub profile).
+*/
 const PROJECTS = [
   {
     name: 'JOB NEXA',
     file: 'Job-Nexa/',
-    description:
-      'Full Stack Job Portal & Recruitment Management System',
+    date: 'Sep 2026 – Oct 2026',
+    featured: true,
+    description: 'Full Stack Job Portal and Recruitment Management System',
     points: [
-      ' Developed a full-stack job portal application similar to Naukri, designed for freshers and experienced professionals, enabling candidates to search and apply for jobs while recruiters manage job postings and recruitment activities.',
-      'Built responsive frontend interfaces using React.js, Vite, React Router DOM, Axios, and CSS, implementing role-based dashboards for Candidates, Recruiters, and Admins, along with job search, filtering, profile management, and application tracking',
-      ' Developed RESTful APIs using Node.js and Express.js, integrated Microsoft SQL Server for database management, and implemented secure authentication and authorization using JWT and bcrypt, including resume uploads, applicant management,and job application workflows',
+      'Developed a full-stack job portal with job search, filtering, profile management and application tracking for candidates, and job posting and applicant management for recruiters.',
+      'Built responsive React.js front ends with React Router DOM, Axios and CSS, including role-based dashboards for Candidates, Recruiters and Admins.',
+      'Developed REST APIs in Node.js and Express.js on Microsoft SQL Server, with JWT and bcrypt authentication and authorization, resume uploads and job application workflows.',
     ],
-    stack: ['React.js', 'Vite, JavaScript (ES6+)', 'React Router DOM, Axios', 'HTML5', 'CSS3', 'Node.js', 'Express.js', 'RESTful APIs',
-      'Microsoft SQL Server', 'JWT', 'bcrypt', 'Multer, Recharts', ' Git', ' GitHub'],
+    stack: [
+      'React.js', 'Vite', 'JavaScript (ES6+)', 'React Router DOM', 'Axios', 'HTML5', 'CSS3',
+      'Node.js', 'Express.js', 'RESTful APIs', 'Microsoft SQL Server', 'JWT', 'bcrypt',
+      'Multer', 'Recharts', 'Git', 'GitHub',
+    ],
     link: 'https://github.com/Natanasundaram/JOB-NEXA',
   },
   {
     name: 'Task Manager',
     file: 'task-manager/',
-    description:
-      'Developed a full-stack Task Manager application with secure user authentication and task CRUD operations. Built REST APIs using Node.js and Express.js, integrated SQL Server for data management, and implemented JWT authentication, bcrypt password hashing, and protected React routes.',
+    date: 'Sep 2026',
+    featured: true,
+    description: 'Full-stack task manager with secure user authentication and task CRUD.',
     points: [
-      ' Built a full-stack task manager with 8 REST API endpoints covering task CRUD, registration, login, and a database health check.',
-      'Secured the API with JWT authentication, bcrypt password hashing, and parameterized T-SQL queries; scoped every query by user ID so each user can only read and change their own tasks..',
-      'Designed the relational SQL Server schema with a foreign key (cascade delete), CHECK constraints, and a composite index.',
-      ' Built the UI with React Router protected routes, Axios interceptors, and React Hooks (useState, useEffect, useMemo).'
+      'Built a full-stack task manager with 8 REST API endpoints covering task CRUD, user registration, login and a database health check.',
+      'Implemented JWT authentication, bcrypt password hashing and parameterized T-SQL queries, with every query scoped to user ID so users access only their own tasks.',
+      'Designed a relational SQL Server schema with a foreign key (cascade delete), CHECK constraints and a composite index.',
+      'Built the front end with React Router protected routes, Axios interceptors and React Hooks (useState, useEffect, useMemo).',
     ],
-    stack: ['React 18', 'Vite', 'Node.js', 'Express 5', 'Microsoft SQL Server', 'RESTful APIs', 'bcrypt', 'JWT'],
+    stack: ['React 18', 'Vite', 'Node.js', 'Express 5', 'SQL Server', 'RESTful APIs', 'bcrypt', 'JWT'],
     link: 'https://github.com/Natanasundaram/Task-Manager',
+  },
+  {
+    name: 'Social Media Application',
+    file: 'social-app/',
+    description:
+      'A React front end wired to a REST API through Axios, with full CRUD on posts — create, edit, delete, and a live feed.',
+    points: [
+      'Integrated a React.js front end with REST APIs using Axios, implementing CRUD operations (GET, POST, PUT, DELETE) for post management.',
+      'Built 5+ reusable React components with Hooks for updates without a page refresh, in a responsive UI for desktop and mobile.',
+    ],
+    stack: ['React.js', 'JavaScript', 'HTML5', 'CSS3', 'Axios'],
+    link: 'https://github.com/Natanasundaram/Social-media',
   },
   {
     name: 'To-Do List Web Application',
@@ -86,18 +135,6 @@ const PROJECTS = [
     link: 'https://github.com/Natanasundaram/To-Do-List',
   },
   {
-    name: 'Social Media Application',
-    file: 'social-app/',
-    description:
-      'A React front end wired to a REST API through Axios, with full CRUD on posts — create, edit, delete, and a live feed.',
-    points: [
-      'GET/POST/PUT/DELETE all implemented against the API, no page reloads for post updates.',
-      '5+ reusable components built with Hooks, styled responsively in HTML5/CSS3.',
-    ],
-    stack: ['React.js', 'JavaScript', 'Axios', 'HTML5', 'CSS3'],
-    link: 'https://github.com/Natanasundaram/Social-media',
-  },
-  {
     name: 'Air Quality & Health Assessment',
     file: 'air-quality-fl/',
     description:
@@ -107,18 +144,52 @@ const PROJECTS = [
       'Built 2+ alert features and mapped readings against a health dataset covering 20+ conditions.',
     ],
     stack: ['HTML', 'CSS'],
-    link: 'https://github.com/natanasundaram08',
+    link: GITHUB_PROFILE,
+    linkLabel: 'GitHub profile',
   },
 ]
 
 const SKILLS = [
-  { group: 'Languages', items: ['JavaScript', 'Java'] },
-  { group: 'Frameworks & Libraries', items: ['React.js', 'Node.js', 'Express'] },
-  { group: 'Databases', items: ['MySQL', 'MS SQL Server'] },
-  { group: 'Tools', items: ['Git', 'GitHub', 'VS Code'] },
+  { group: 'Programming Languages', items: ['JavaScript (ES6+)', 'Java', 'HTML5', 'CSS3'] },
+  { group: 'Frontend', items: ['React.js', 'React Router', 'React Hooks', 'Vite', 'Axios', 'Recharts'] },
+  {
+    group: 'Backend and APIs',
+    items: ['Node.js', 'Express.js', 'RESTful APIs', 'JWT authentication and authorization', 'bcrypt', 'Multer'],
+  },
+  { group: 'Databases', items: ['Microsoft SQL Server', 'MySQL', 'SQL', 'T-SQL'] },
+  { group: 'Tools', items: ['Git (version control)', 'GitHub', 'Visual Studio Code', 'Postman'] },
+  {
+    group: 'Professional Skills',
+    items: [
+      'Problem Solving',
+      'Attention to Detail',
+      'Team Collaboration',
+      'Communication',
+      'Adaptability',
+      'Time Management',
+    ],
+  },
+]
+
+const EDUCATION = [
+  {
+    degree: 'Bachelor of Engineering (B.E.), Computer Science and Engineering',
+    school: 'SRM TRP Engineering College',
+    location: 'Trichy, India',
+    dates: 'Sep 2022 – May 2026',
+    score: 'CGPA 8.03',
+  },
+  {
+    degree: 'Higher Secondary',
+    school: 'Nirmala Matric Hr Sec School',
+    location: 'Chidambaram, India',
+    dates: '2020 – 2021',
+    score: '80.30%',
+  },
 ]
 
 /* ---------- Email ---------- */
+// It feeds the "say hello" button and the big email button in the Contact section.
 const EMAIL = 'nadanasundaram79@gmail.com'
 const MAIL_SUBJECT = 'Hello Natana' // edit this to change the pre-filled subject line
 
@@ -133,26 +204,100 @@ const MAIL_LINK_PROPS = IS_MOBILE
   : { href: GMAIL_COMPOSE_URL, target: '_blank', rel: 'noreferrer' }
 
 /* ---------- Profile photo ---------- */
-// Put your photo in the project's `public` folder (next to index.html) and name it photo.jpg.
-// Using a different name or format (e.g. me.png)? Just change PHOTO_FILE below.
+// The photo lives in the project's `public` folder (next to index.html).
+// To change it, replace public/photo.png — or point PHOTO_FILE at a different file name.
+// The frame is portrait (4:5) like a LinkedIn / Naukri profile picture, so a head-and-shoulders
+// or half-body shot with the suit showing works best.
 const PHOTO_FILE = 'photo.png'
 const PHOTO_SRC = `${import.meta.env.BASE_URL}${PHOTO_FILE}`
 
-// Inline styles so the photo looks right without touching your CSS file.
-// Change `width` / `height` here to make the photo bigger or smaller.
-const PHOTO_STYLE = {
-  position: 'relative',
-  zIndex: 1,
-  display: 'block',
-  width: 140,
-  height: 140,
-  maxWidth: '100%',
-  borderRadius: '50%',
-  objectFit: 'cover',
-  objectPosition: 'center top', // keeps faces in frame for portrait photos
-  border: '2px solid rgba(128, 128, 128, 0.4)',
-  boxShadow: '0 8px 28px rgba(0, 0, 0, 0.25)',
-  marginBottom: 24,
+function GithubIcon() {
+  return (
+    <svg className="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+      <path
+        fill="currentColor"
+        d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+      />
+    </svg>
+  )
+}
+
+/* ---------- 3D effects ---------- */
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+/*
+  Tilt: the element leans toward the mouse pointer (CSS does the 3D, this only feeds it numbers).
+  `max` is the strongest lean in degrees. Mouse only — touch screens and
+  "reduce motion" users get the plain, flat card.
+*/
+function Tilt({ as: Component = 'div', max = 6, className = '', children, ...rest }) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el || prefersReducedMotion()) return undefined
+
+    const onMove = (event) => {
+      if (event.pointerType !== 'mouse') return
+      const box = el.getBoundingClientRect()
+      const x = (event.clientX - box.left) / box.width // 0 → 1, left to right
+      const y = (event.clientY - box.top) / box.height // 0 → 1, top to bottom
+      el.style.setProperty('--ry', `${((x - 0.5) * 2 * max).toFixed(2)}deg`)
+      el.style.setProperty('--rx', `${((0.5 - y) * 2 * max).toFixed(2)}deg`)
+      el.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`)
+      el.style.setProperty('--my', `${(y * 100).toFixed(1)}%`)
+      el.classList.add('is-tilting')
+    }
+
+    const onLeave = () => {
+      el.classList.remove('is-tilting')
+      el.style.setProperty('--rx', '0deg')
+      el.style.setProperty('--ry', '0deg')
+    }
+
+    el.addEventListener('pointermove', onMove)
+    el.addEventListener('pointerleave', onLeave)
+    return () => {
+      el.removeEventListener('pointermove', onMove)
+      el.removeEventListener('pointerleave', onLeave)
+    }
+  }, [max])
+
+  return (
+    <Component ref={ref} className={`tilt ${className}`.trim()} {...rest}>
+      {children}
+    </Component>
+  )
+}
+
+/* Elements marked data-reveal rise and flip into place the first time they scroll into view. */
+function useReveal() {
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined' || prefersReducedMotion()) return undefined
+
+    const root = document.documentElement
+    root.classList.add('reveal-ready')
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-in')
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }
+    )
+
+    document.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el))
+
+    return () => {
+      observer.disconnect()
+      root.classList.remove('reveal-ready')
+    }
+  }, [])
 }
 
 function useActiveSection(ids) {
@@ -185,6 +330,7 @@ export default function App() {
   const active = useActiveSection(NAV_LINKS.map((link) => link.id))
   const [menuOpen, setMenuOpen] = useState(false)
   const [photoFailed, setPhotoFailed] = useState(false) // true if the image file is missing
+  useReveal()
 
   return (
     <>
@@ -227,59 +373,103 @@ export default function App() {
 
       <main id="top">
         <section className="hero">
-          <div className="hero-grid" aria-hidden="true" />
+          <div className="hero-copy">
+            <p className="hero-eyebrow">Full Stack Developer | Software Engineer</p>
 
-          {!photoFailed && (
-            <img
-              src={PHOTO_SRC}
-              alt="Portrait of Natana Sundaram"
-              width="140"
-              height="140"
-              style={PHOTO_STYLE}
-              onError={() => setPhotoFailed(true)}
-            />
-          )}
+            <h2>
+              Natana <span className="hero-surname">Sundaram</span>
+            </h2>
 
-          <p className="hero-eyebrow">
-            full-stack developer, based in Chennai, India
-          </p>
+            <p className="hero-line">
+              I build interfaces in React and the APIs behind them in Node and Express
+              <span className="caret" aria-hidden="true"></span>
+            </p>
 
-          <h2>Natana sundaram</h2>
+            <p className="hero-sub">
+              Three internships and five projects in — I've owned features start to finish:
+              component design, REST endpoints, JWT authentication and the SQL schema underneath.
+              Graduated in May 2026 and looking for an entry-level Full Stack Developer or
+              Software Engineer role.
+            </p>
 
-          <p className="hero-line">
-            I build interfaces in React and the APIs behind them in Node and Express
-            <span className="caret" aria-hidden="true"></span>
-          </p>
-
-          <p className="hero-sub">
-            Three internships and two independent projects in — I've owned features start to
-            finish: component design, REST endpoints, and the SQL schema underneath. Looking for
-            an entry-level full-stack role to keep going.
-          </p>
-
-          <div className="hero-actions">
-            <a className="btn-primary" href="#projects">See the projects</a>
-            <a className="btn-ghost" href="#contact">Get in touch</a>
+            <div className="hero-actions">
+              <a className="btn-primary" href="#projects">See the projects</a>
+              <a className="btn-ghost" href="#contact">Get in touch</a>
+            </div>
           </div>
+
+          <Tilt className="profile" max={9}>
+            <div className="hero-grid" aria-hidden="true" />
+
+            <div className="profile-card">
+              <div className="profile-photo">
+                {photoFailed ? (
+                  <div className="profile-fallback" aria-hidden="true">NS</div>
+                ) : (
+                  <img
+                    src={PHOTO_SRC}
+                    alt="Portrait of Natana Sundaram"
+                    width="480"
+                    height="600"
+                    onError={() => setPhotoFailed(true)}
+                  />
+                )}
+              </div>
+
+              <div className="profile-body">
+                <p className="profile-name">Natana Sundaram</p>
+                <p className="profile-role">Full Stack Developer</p>
+                <p className="profile-loc">{LOCATION}</p>
+                <p className="profile-status">Open to work</p>
+              </div>
+            </div>
+
+            {/* Chips that float in front of the photo card (they sit at a different 3D depth). */}
+            <span className="float-chip chip-react" aria-hidden="true">React.js</span>
+            <span className="float-chip chip-node" aria-hidden="true">Node.js</span>
+            <span className="float-chip chip-sql" aria-hidden="true">SQL Server</span>
+            
+          </Tilt>
+
+          <ul className="hero-stats">
+            {STATS.map((stat, i) => (
+              <li key={stat.label} data-reveal style={{ '--d': `${i * 90}ms` }}>
+                <span className="stat-value">{stat.value}</span>
+                <span className="stat-label">{stat.label}</span>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section id="about" className="section">
           <p className="section-tag">About</p>
-          <div className="section-body">
-            <p>
-              I got into web development the way most people in this field do now: through
-              structured internships rather than a single bootcamp or course. NoviTech, CodSoft,
-              and TechnoHack each covered a different slice of the stack — React state, layout
-              fundamentals, cross-browser quirks — and I turned that training into two projects
-              of my own so the concepts would actually stick.
-            </p>
-            <p>
-              I'm currently in my final year of a Computer Science degree at SRM TRP Engineering
-              College, and I'm looking for my first full-time role as a full-stack developer.
-              I'm comfortable moving between the React side of a feature and the Node/Express/SQL
-              side of it, and I'd rather ship something small and working than talk about
-              something big and theoretical.
-            </p>
+          <div className="about-grid">
+            <div className="section-body">
+              <p>
+                I'm a Software Developer who enjoys turning ideas into functional, user-friendly web applications. I work across frontend and backend development, building responsive interfaces, developing REST APIs, and integrating databases to create complete web solutions.
+
+                I enjoy solving problems, exploring new technologies, and continuously improving my development skills. My focus is on writing clean, maintainable code and building applications that are not just functional, but also deliver a great user experience
+              </p>
+              <p>
+                I graduated in May 2026 with a B.E. in Computer Science and Engineering from SRM
+                TRP Engineering College (CGPA 8.03), and I'm looking for my first full-time role as
+                a full-stack developer or software engineer. I'm comfortable moving between the
+                React side of a feature and the Node/Express/SQL side of it, and I'd rather ship
+                something small and working than talk about something big and theoretical.
+              </p>
+            </div>
+
+            <div className="facts" data-reveal>
+              <p className="facts-title">quick facts</p>
+              <dl>
+                {FACTS.map(([key, value]) => (
+                  <div className="facts-row" key={key}>
+                    <dt>{key}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
         </section>
 
@@ -287,7 +477,7 @@ export default function App() {
           <p className="section-tag">Experience</p>
           <ol className="timeline">
             {EXPERIENCE.map((job) => (
-              <li key={job.org} className="timeline-item">
+              <li key={job.org} className="timeline-item" data-reveal>
                 <div className="timeline-head">
                   <h3>{job.role}</h3>
                   <span className="timeline-dates">{job.dates}</span>
@@ -316,32 +506,51 @@ export default function App() {
         <section id="projects" className="section">
           <p className="section-tag">Projects</p>
           <div className="project-list">
-            {PROJECTS.map((project) => (
-              <a
-                className="project-card"
-                href={project.link}
-                target="_blank"
-                rel="noreferrer"
+            {PROJECTS.map((project, i) => (
+              <Tilt
+                as="article"
+                max={project.featured ? 2.5 : 6}
+                className={`project-card ${project.featured ? 'is-featured' : ''}`}
                 key={project.name}
+                data-reveal
+                style={{ '--d': `${Math.max(0, i - 2) * 100}ms` }}
               >
-                <div className="project-file">{project.file}</div>
-                <h3>{project.name}</h3>
-                <p>{project.description}</p>
+                <div className="project-head">
+                  <div className="project-meta">
+                    <span className="project-file">{project.file}</span>
+                    {project.date && <span className="project-date">{project.date}</span>}
+                  </div>
+                  <h3>{project.name}</h3>
+                  <p className="project-desc">{project.description}</p>
+                </div>
 
-                <ul>
+                <ul className="project-points">
                   {project.points.map((point) => (
                     <li key={point}>{point}</li>
                   ))}
                 </ul>
 
-                <div className="tag-row">
+                <div className="tag-row project-tags">
                   {project.stack.map((tech) => (
                     <span className="tag" key={tech}>{tech}</span>
                   ))}
                 </div>
 
-                <span className="project-link">view repo →</span>
-              </a>
+                <div className="project-foot">
+                  <a
+                    className="project-link"
+                    href={project.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`${project.name} — ${project.linkLabel ?? 'GitHub repository'}`}
+                  >
+                    <GithubIcon />
+                    {project.linkLabel ?? 'GitHub repository'}
+                    <span aria-hidden="true">↗</span>
+                  </a>
+                  <span className="project-repo">{project.link.replace('https://', '')}</span>
+                </div>
+              </Tilt>
             ))}
           </div>
         </section>
@@ -349,15 +558,44 @@ export default function App() {
         <section id="skills" className="section">
           <p className="section-tag">Skills</p>
           <div className="skills-grid">
-            {SKILLS.map((group) => (
-              <div className="skills-group" key={group.group}>
+            {SKILLS.map((group, i) => (
+              <Tilt
+                className="skills-group"
+                max={5}
+                key={group.group}
+                data-reveal
+                style={{ '--d': `${(i % 3) * 90}ms` }}
+              >
                 <h4>{group.group}</h4>
                 <div className="tag-row">
                   {group.items.map((item) => (
                     <span className="tag" key={item}>{item}</span>
                   ))}
                 </div>
-              </div>
+              </Tilt>
+            ))}
+          </div>
+        </section>
+
+        <section id="education" className="section">
+          <p className="section-tag">Education</p>
+          <div className="edu-grid">
+            {EDUCATION.map((item, i) => (
+              <Tilt
+                className="edu-card"
+                max={4}
+                key={item.degree}
+                data-reveal
+                style={{ '--d': `${i * 120}ms` }}
+              >
+                <div className="edu-top">
+                  <span className="edu-dates">{item.dates}</span>
+                  <span className="edu-score">{item.score}</span>
+                </div>
+                <h3>{item.degree}</h3>
+                <p className="edu-school">{item.school}</p>
+                <p className="edu-loc">{item.location}</p>
+              </Tilt>
             ))}
           </div>
         </section>
@@ -375,14 +613,36 @@ export default function App() {
           </a>
 
           <div className="contact-links">
-            <a href="tel:+919384375263">+91 93843 75263</a>
-            <a href="https://github.com/Natanasundaram" target="_blank" rel="noreferrer">
-              GitHub
+            <a className="contact-item" href={PHONE_TEL} data-reveal style={{ '--d': '0ms' }}>
+              <span className="contact-label">Phone</span>
+              <span className="contact-value">{PHONE_DISPLAY}</span>
             </a>
-            <a href="https://www.linkedin.com/in/natanasundaram08/" target="_blank" rel="noreferrer">
-              LinkedIn
+            <a
+              className="contact-item"
+              href={GITHUB_PROFILE}
+              target="_blank"
+              rel="noreferrer"
+              data-reveal
+              style={{ '--d': '90ms' }}
+            >
+              <span className="contact-label">GitHub</span>
+              <span className="contact-value">Natanasundaram ↗</span>
             </a>
-            <span>Chennai, India</span>
+            <a
+              className="contact-item"
+              href={LINKEDIN_URL}
+              target="_blank"
+              rel="noreferrer"
+              data-reveal
+              style={{ '--d': '180ms' }}
+            >
+              <span className="contact-label">LinkedIn</span>
+              <span className="contact-value">natanasundaram08 ↗</span>
+            </a>
+            <div className="contact-item" data-reveal style={{ '--d': '270ms' }}>
+              <span className="contact-label">Location</span>
+              <span className="contact-value">{LOCATION}</span>
+            </div>
           </div>
         </section>
       </main>

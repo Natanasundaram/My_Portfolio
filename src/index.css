@@ -37,6 +37,7 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.55;
+  overflow-x: clip; /* 3D-transformed elements can never cause sideways scrolling */
 }
 
 body,
@@ -47,6 +48,12 @@ a {
 
 a {
   color: inherit;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
 }
 
 button,
@@ -79,6 +86,48 @@ h4 {
 img {
   max-width: 100%;
   display: block;
+}
+
+/* 3D TILT
+   .tilt elements lean toward the mouse. App.jsx feeds in --rx / --ry (the lean) and
+   --mx / --my (pointer position, for the glare); this is the CSS that turns them into 3D. */
+
+.tilt {
+  --tilt-t: 0.45s;
+  transform:
+    perspective(900px)
+    translateY(var(--lift, 0px))
+    rotateX(var(--rx, 0deg))
+    rotateY(var(--ry, 0deg));
+}
+
+.tilt.is-tilting {
+  --tilt-t: 0.08s;
+}
+
+/* a soft light that follows the pointer across a tilting card */
+.profile-card::after,
+.project-card::after,
+.skills-group::after,
+.edu-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 50%),
+    rgba(245, 247, 255, 0.14),
+    transparent 55%
+  );
+  transition: opacity 0.25s ease;
+}
+
+.tilt.is-tilting::after,
+.profile.is-tilting .profile-card::after {
+  opacity: 1;
 }
 
 /* NAVBAR */
@@ -136,7 +185,7 @@ img {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: clamp(16px, 2.2vw, 28px);
 
   font-family: var(--font-mono);
   font-size: 0.9rem;
@@ -201,24 +250,17 @@ main {
 .hero {
   position: relative;
   isolation: isolate;
-  padding: 110px 0 95px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  align-items: center;
+  gap: 48px 72px;
+
+  padding: 84px 0 80px;
 }
 
-.hero-grid {
-  position: absolute;
-  top: 25px;
-  right: 0;
-  width: 260px;
-  height: 260px;
-
-  background-image:
-    linear-gradient(rgba(111, 139, 255, 0.35) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(111, 139, 255, 0.35) 1px, transparent 1px);
-
-  background-size: 22px 22px;
-  opacity: 1;
-  z-index: -1;
-  pointer-events: none;
+.hero-copy {
+  min-width: 0;
 }
 
 .hero-eyebrow {
@@ -242,18 +284,21 @@ main {
 }
 
 .hero h2 {
-  max-width: 900px;
-  font-size: clamp(2.4rem, 6vw, 7rem);
+  font-size: clamp(2.8rem, 6.2vw, 5.4rem);
   font-weight: 500;
-  line-height: 0.95;
+  line-height: 0.98;
   color: var(--ink);
 }
 
+.hero-surname {
+  display: block;
+}
+
 .hero-line {
-  max-width: 700px;
+  max-width: 640px;
   margin: 28px 0 20px;
   font-family: var(--font-display);
-  font-size: clamp(1.2rem, 2.6vw, 1.55rem);
+  font-size: clamp(1.2rem, 2.4vw, 1.5rem);
   font-weight: 500;
   line-height: 1.35;
   color: var(--ink);
@@ -279,7 +324,7 @@ main {
 }
 
 .hero-sub {
-  max-width: 700px;
+  max-width: 640px;
   margin: 0 0 34px;
   color: var(--muted);
 }
@@ -288,6 +333,241 @@ main {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+/* PROFILE CARD (photo) */
+
+/* The whole photo scene tilts as one 3D object: grid behind, card in the middle, chips in front. */
+.profile {
+  position: relative;
+  width: 100%;
+  max-width: 250px;
+  justify-self: end;
+
+  transform-style: preserve-3d;
+  transition: transform var(--tilt-t) ease-out;
+}
+
+.hero-grid {
+  position: absolute;
+  top: -26px;
+  right: -26px;
+  width: 72%;
+  height: 62%;
+  transform: translateZ(-40px);
+
+  background-image:
+    linear-gradient(rgba(111, 139, 255, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(111, 139, 255, 0.35) 1px, transparent 1px);
+
+  background-size: 22px 22px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.profile-card {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 6px;
+}
+
+.profile-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  height: 6px;
+  background: var(--lime);
+}
+
+.profile-photo {
+  aspect-ratio: 4 / 5;
+  background: var(--panel-2);
+  border-bottom: 2px solid var(--line);
+  overflow: hidden;
+}
+
+.profile-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+.profile-fallback {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-family: var(--font-display);
+  font-size: 5rem;
+  font-weight: 600;
+  color: var(--lime);
+}
+
+.profile-body {
+  padding: 18px 20px 20px;
+}
+
+.profile-body p {
+  margin: 0;
+}
+
+.profile-name {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.profile-role {
+  margin-top: 4px !important;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--blue-light);
+}
+
+.profile-loc {
+  margin-top: 2px !important;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.profile-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px !important;
+  padding: 6px 10px;
+
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--ink);
+}
+
+.profile-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--lime);
+  border-radius: 50%;
+  animation: pulse 2s ease-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(200, 255, 61, 0.55);
+  }
+
+  70%, 100% {
+    box-shadow: 0 0 0 8px rgba(200, 255, 61, 0);
+  }
+}
+
+/* Floating tech chips: they sit in front of the photo card in 3D, so they slide as the scene tilts. */
+.float-chip {
+  position: absolute;
+  padding: 6px 11px;
+
+  background: var(--panel-2);
+  border: 1px solid var(--blue);
+  border-radius: 4px;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  white-space: nowrap;
+  pointer-events: none;
+
+  transform: translateZ(60px);
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Chips only ever overlap the photo's edges (never the name / role text below it). */
+.chip-react {
+  top: 9%;
+  left: -56px;
+}
+
+.chip-node {
+  top: 44%;
+  right: -50px;
+  animation-delay: -2s;
+}
+
+.chip-sql {
+  top: 54%;
+  left: -64px;
+  animation-delay: -4s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateZ(60px) translateY(0);
+  }
+
+  50% {
+    transform: translateZ(60px) translateY(-8px);
+  }
+}
+
+/* HERO STATS */
+
+.hero-stats {
+  grid-column: 1 / -1;
+
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 6px;
+}
+
+.hero-stats li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 18px 24px;
+  border-left: 2px solid var(--line);
+}
+
+.hero-stats li:first-child {
+  border-left: 0;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--lime);
+  /* stacked offsets give the numbers a solid, extruded 3D edge */
+  text-shadow:
+    1px 1px 0 var(--blue),
+    2px 2px 0 var(--blue);
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--muted);
 }
 
 /* BUTTONS */
@@ -307,13 +587,16 @@ main {
     background 0.2s ease,
     color 0.2s ease,
     border-color 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
+/* Raised 3D buttons: a solid edge underneath that lifts on hover and presses down on click. */
 .btn-primary {
   background: var(--lime);
   color: var(--bg);
   border: 2px solid var(--lime);
+  box-shadow: 0 4px 0 var(--blue);
 }
 
 .btn-primary:hover {
@@ -321,12 +604,19 @@ main {
   color: var(--ink);
   border-color: var(--blue);
   transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--lime);
+}
+
+.btn-primary:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--lime);
 }
 
 .btn-ghost {
   background: transparent;
   color: var(--ink);
   border: 2px solid var(--line);
+  box-shadow: 0 4px 0 var(--line);
 }
 
 .btn-ghost:hover {
@@ -334,6 +624,12 @@ main {
   color: var(--lime);
   border-color: var(--lime);
   transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--lime);
+}
+
+.btn-ghost:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--lime);
 }
 
 .btn-large {
@@ -352,7 +648,7 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 28px;
+  margin: 0 0 32px;
   font-family: var(--font-mono);
   font-size: 1.5rem;
   font-weight: 500;
@@ -362,10 +658,19 @@ main {
 .section-tag::before {
   content: '';
   display: inline-block;
+  flex: none;
   width: 8px;
   height: 8px;
   background: var(--lime);
   border-radius: 2px;
+}
+
+.section-tag::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  margin-left: 14px;
+  background: var(--line);
 }
 
 .section-body p {
@@ -376,6 +681,68 @@ main {
 
 .section-body p:last-child {
   margin-bottom: 0;
+}
+
+/* ABOUT */
+
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 40px 56px;
+  align-items: start;
+}
+
+.facts {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  overflow: hidden;
+}
+
+.facts-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 11px 16px;
+  background: var(--panel-2);
+  border-bottom: 2px solid var(--line);
+  color: var(--muted);
+}
+
+.facts-title::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--lime);
+  border-radius: 2px;
+}
+
+.facts dl {
+  margin: 0;
+}
+
+.facts-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 14px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.facts-row:last-child {
+  border-bottom: 0;
+}
+
+.facts-row dt {
+  color: var(--blue-light);
+}
+
+.facts-row dd {
+  margin: 0;
+  color: var(--ink);
 }
 
 /* EXPERIENCE */
@@ -435,39 +802,57 @@ main {
   color: var(--blue-light);
 }
 
-.timeline-item ul {
+.timeline-item ul,
+.project-points {
   margin: 0 0 15px;
-  padding-left: 18px;
+  padding-left: 0;
+  list-style: none;
   color: var(--muted);
 }
 
-.timeline-item li {
+.timeline-item li,
+.project-points li {
+  position: relative;
   margin-bottom: 7px;
+  padding-left: 18px;
+}
+
+.timeline-item li::before,
+.project-points li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  background: var(--blue-light);
+  border-radius: 1px;
 }
 
 /* PROJECTS */
 
 .project-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 22px;
 }
 
 .project-card {
+  grid-column: span 2;
   position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   padding: 30px;
 
   background: var(--panel);
   border: 2px solid var(--line);
   border-radius: 6px;
 
-  text-decoration: none;
   color: inherit;
   overflow: hidden;
 
   transition:
-    transform 0.2s ease,
+    transform var(--tilt-t) ease-out,
     box-shadow 0.2s ease,
     border-color 0.2s ease;
 }
@@ -483,47 +868,132 @@ main {
 }
 
 .project-card:hover {
-  transform: translateY(-4px);
+  --lift: -4px; /* the hover lift is part of the .tilt transform */
   border-color: var(--blue);
   box-shadow: 8px 8px 0 var(--lime);
 }
 
-.project-file {
+/* Featured cards span the full width: title + stack on the left, bullets on the right. */
+.project-card.is-featured {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  grid-template-areas:
+    'head points'
+    'tags points'
+    'foot points';
+  grid-template-rows: auto auto 1fr;
+  column-gap: 48px;
+  align-content: start;
+}
+
+.is-featured .project-head {
+  grid-area: head;
+}
+
+.is-featured .project-points {
+  grid-area: points;
+  align-self: start;
+  margin-top: 30px;
+  font-size: 0.97rem;
+}
+
+.is-featured .project-tags {
+  grid-area: tags;
+}
+
+.is-featured .project-foot {
+  grid-area: foot;
+  align-self: end;
+}
+
+.project-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
   margin-bottom: 10px;
   font-family: var(--font-mono);
   font-size: 0.76rem;
+}
+
+.project-file {
   color: var(--blue-light);
+}
+
+.project-date {
+  color: var(--muted);
 }
 
 .project-card h3 {
   margin-bottom: 10px;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
-.project-card p {
-  margin: 0 0 14px;
+.project-desc {
+  margin: 0 0 16px;
   color: var(--ink);
 }
 
-.project-card ul {
-  margin: 0 0 16px;
-  padding-left: 18px;
-  color: var(--muted);
+.project-points {
   font-size: 0.93rem;
 }
 
-.project-card li {
-  margin-bottom: 7px;
+.project-tags {
+  margin-bottom: 20px;
 }
 
+.project-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: auto;
+}
+
+/* The link's ::after stretches over the whole card so the entire card is clickable. */
 .project-link {
-  display: inline-block;
-  margin-top: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+
+  background: var(--panel-2);
+  border: 2px solid var(--line);
+  border-radius: 4px;
+
   font-family: var(--font-mono);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 500;
-  color: var(--blue-light);
+  text-decoration: none;
+  color: var(--ink);
+
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.project-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.project-card:hover .project-link {
+  background: var(--lime);
+  border-color: var(--lime);
+  color: var(--bg);
+}
+
+.project-link:focus-visible {
+  outline-offset: 3px;
+}
+
+.project-repo {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 /* TAGS */
@@ -560,18 +1030,121 @@ main {
 
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 38px 60px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
 }
 
 .skills-group {
+  position: relative;
   min-width: 0;
+  padding: 22px;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 6px;
+
+  transition:
+    transform var(--tilt-t) ease-out,
+    border-color 0.2s ease;
+}
+
+.skills-group:hover,
+.edu-card:hover {
+  border-color: var(--blue);
 }
 
 .skills-group h4 {
-  margin-bottom: 12px;
-  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 0.98rem;
   font-weight: 600;
+}
+
+.skills-group h4::before {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  background: var(--lime);
+  border-radius: 2px;
+}
+
+/* EDUCATION */
+
+.edu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.edu-card {
+  position: relative;
+  padding: 30px;
+
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+
+  transition:
+    transform var(--tilt-t) ease-out,
+    border-color 0.2s ease;
+}
+
+.edu-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: var(--blue);
+}
+
+.edu-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-bottom: 16px;
+}
+
+.edu-dates {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.edu-score {
+  padding: 4px 10px;
+  background: var(--lime);
+  border-radius: 4px;
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.edu-card h3 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.edu-school {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--blue-light);
+}
+
+.edu-loc {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  color: var(--muted);
 }
 
 /* CONTACT */
@@ -594,31 +1167,48 @@ main {
 }
 
 .contact-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 24px;
-  margin-top: 26px;
-
-  font-family: var(--font-mono);
-  font-size: 0.86rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 36px;
 }
 
-.contact-links a {
-  padding-bottom: 3px;
+.contact-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 16px 18px;
+
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 6px;
+
   text-decoration: none;
   color: var(--ink);
-  border-bottom: 2px solid var(--lime);
 
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.contact-links a:hover {
-  color: var(--blue-light);
+a.contact-item:hover {
   border-color: var(--blue);
+  transform: translateY(-2px);
 }
 
-.contact-links span {
+.contact-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
   color: var(--muted);
+}
+
+.contact-value {
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  overflow-wrap: anywhere;
+}
+
+a.contact-item:hover .contact-value {
+  color: var(--blue-light);
 }
 
 /* FOOTER */
@@ -648,7 +1238,134 @@ main {
   color: var(--blue-light);
 }
 
+/* 3D SCROLL REVEAL
+   Elements marked data-reveal in App.jsx flip up into place the first time they scroll into view.
+   The parents' perspective is what makes the flip look 3D. */
+
+.project-list,
+.skills-grid,
+.edu-grid,
+.timeline,
+.contact-links,
+.hero-stats,
+.about-grid {
+  perspective: 1400px;
+}
+
+.reveal-ready [data-reveal]:not(.is-in) {
+  opacity: 0;
+}
+
+.reveal-ready [data-reveal].is-in {
+  animation: rise-in 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0s) backwards;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    translate: 0 40px;
+    rotate: x 18deg;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+    rotate: x 0deg;
+  }
+}
+
+/* TABLET */
+
+@media (max-width: 1000px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) 230px;
+    gap: 40px 44px;
+  }
+
+  /* less overhang on tablets so the chips stay out of the text column */
+  .chip-react {
+    left: -34px;
+  }
+
+  .chip-node {
+    right: -34px;
+  }
+
+  .chip-sql {
+    left: -38px;
+  }
+
+  .project-card {
+    grid-column: span 3;
+  }
+
+  .project-card.is-featured {
+    grid-column: 1 / -1;
+  }
+
+  .skills-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contact-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* MOBILE */
+
+@media (max-width: 900px) {
+  .about-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .project-card.is-featured {
+    display: flex;
+  }
+
+  .is-featured .project-points {
+    margin-top: 0;
+    font-size: 0.93rem;
+  }
+}
+
+/* Hero goes single-column (photo card first) on phones and small tablets. */
+@media (max-width: 760px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+    padding: 56px 0 56px;
+  }
+
+  .profile {
+    order: -1;
+    max-width: 240px;
+    justify-self: start;
+  }
+
+  /* the card sits at the left edge on phones, so the chips float off its right side instead */
+  .chip-react {
+    top: 10%;
+    left: auto;
+    right: -40px;
+  }
+
+  .chip-node {
+    top: 32%;
+    right: -52px;
+  }
+
+  .chip-sql {
+    top: 54%;
+    left: auto;
+    right: -36px;
+  }
+
+  .hero-grid {
+    top: -14px;
+    right: -14px;
+  }
+}
 
 @media (max-width: 820px) {
   .nav {
@@ -686,22 +1403,19 @@ main {
     text-align: center;
   }
 
-  .hero {
-    padding: 70px 0 60px;
-  }
-
-  .hero-grid {
-    width: 170px;
-    height: 170px;
-  }
-
-  .project-list {
+  .project-list,
+  .edu-grid {
     grid-template-columns: 1fr;
+  }
+
+  .project-card,
+  .project-card.is-featured {
+    grid-column: auto;
   }
 
   .skills-grid {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 18px;
   }
 
   .section {
@@ -709,17 +1423,32 @@ main {
   }
 }
 
-@media (max-width: 520px) {
-  .hero h1 {
-    font-size: clamp(2.8rem, 16vw, 4rem);
+@media (max-width: 600px) {
+  .hero-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .hero-stats li:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .hero-stats li:nth-child(n + 3) {
+    border-top: 2px solid var(--line);
+  }
+}
+
+@media (max-width: 520px) {
   .hero-line {
     font-size: 1.15rem;
   }
 
-  .project-card {
+  .project-card,
+  .edu-card {
     padding: 26px 20px;
+  }
+
+  .contact-links {
+    grid-template-columns: 1fr;
   }
 
   .timeline-item {
@@ -730,5 +1459,26 @@ main {
     flex-direction: column;
     gap: 10px;
     text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .caret,
+  .profile-status::before,
+  .float-chip,
+  .reveal-ready [data-reveal].is-in {
+    animation: none;
+  }
+
+  .tilt {
+    transform: none;
+  }
+
+  * {
+    transition: none !important;
   }
 }
